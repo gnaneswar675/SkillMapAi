@@ -7,7 +7,7 @@ export default function ProfilePage() {
         <h1 className="text-3xl font-bold tracking-tight">Account Settings</h1>
         <p className="text-muted-foreground">Manage your profile and preferences.</p>
       </div>
-      <div className="w-full max-w-4xl bg-background rounded-2xl overflow-hidden [&_.cl-rootBox]:w-full [&_.cl-card]:w-full [&_.cl-card]:max-w-none [&_.cl-card]:shadow-none [&_.cl-card]:border-0 [&_.cl-navbar]:border-r">
+      <div className="w-full max-w-4xl flex justify-center">
         <UserProfile path="/profile" routing="path" />
       </div>
     </div>

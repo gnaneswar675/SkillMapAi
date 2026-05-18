@@ -12,17 +12,30 @@ export default function SearchPage() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleSearch = (e: React.FormEvent) => {
+  const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!topic.trim()) return;
     
     setIsLoading(true);
-    // In a real app, we would make an API call here to generate the roadmap
-    // and then redirect to the roadmap page with the new ID.
-    // For now, we simulate a delay and redirect.
-    setTimeout(() => {
-      router.push(`/roadmap/mock-id-123?topic=${encodeURIComponent(topic)}`);
-    }, 2000);
+    try {
+      const res = await fetch("/api/generate-roadmap", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ topic }),
+      });
+      
+      if (!res.ok) {
+        const errorText = await res.text();
+        throw new Error(errorText || "Failed to generate roadmap");
+      }
+      
+      const data = await res.json();
+      router.push(`/roadmap/${data.id}?topic=${encodeURIComponent(topic)}`);
+    } catch (error: any) {
+      console.error(error);
+      alert(error.message || "Something went wrong. Please try again.");
+      setIsLoading(false);
+    }
   };
 
   const suggestions = ["React.js", "System Design", "Machine Learning", "Data Structures", "Docker & Kubernetes", "GraphQL"];

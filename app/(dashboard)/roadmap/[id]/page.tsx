@@ -28,13 +28,42 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
   const topic = searchParams.get("topic") || "Topic Roadmap";
   const { theme } = useTheme();
   
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchRoadmap() {
+      if (params.id === "mock-id-123") {
+        setNodes(initialNodes);
+        setEdges(initialEdges);
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const res = await fetch(`/api/roadmap/${params.id}`);
+        if (res.ok) {
+          const data = await res.json();
+          setNodes(data.nodes || []);
+          setEdges(data.edges || []);
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchRoadmap();
+  }, [params.id, setNodes, setEdges]);
 
   const onNodeClick = (_: any, node: any) => {
     setSelectedNode(node);
   };
+
+  if (isLoading) {
+    return <div className="flex items-center justify-center h-[calc(100vh-4rem)] w-full">Loading roadmap...</div>;
+  }
 
   return (
     <div className="flex flex-col h-[calc(100vh-4rem)] md:h-screen w-full relative">
