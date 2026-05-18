@@ -47,7 +47,7 @@ export async function POST(req: Request) {
 
     // Call Gemini AI
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash",
+      model: "gemini-2.0-flash",
       generationConfig: {
         responseMimeType: "application/json",
       }
@@ -101,6 +101,14 @@ Use 6-10 nodes. Spread them out vertically (y: 0, 150, 300, 450...) so they don'
   } catch (error: any) {
     console.error("[ROADMAP_GENERATE_ERROR]", error);
 
+    // Handle Gemini Quota / Rate Limit Error
+    if (error?.status === 429 || error?.message?.includes("429 Too Many Requests") || error?.message?.includes("Quota exceeded")) {
+      return new NextResponse(
+        "Gemini API quota exceeded or rate limited. Your Google Cloud project may require billing to be enabled, or you are in a region without free tier access. Please check your Google AI Studio account.",
+        { status: 429 }
+      );
+    }
+    
     if (error?.message) {
       return new NextResponse(error.message, { status: 500 });
     }
