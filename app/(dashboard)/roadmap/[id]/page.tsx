@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState } from "reactflow";
 import "reactflow/dist/style.css";
 import { Button } from "@/components/ui/button";
@@ -23,7 +23,8 @@ const initialEdges = [
   { id: "e3-4", source: "3", target: "4" },
 ];
 
-export default function RoadmapPage({ params }: { params: { id: string } }) {
+export default function RoadmapPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = use(params);
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic") || "Topic Roadmap";
   const { theme } = useTheme();
@@ -35,14 +36,14 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
 
   useEffect(() => {
     async function fetchRoadmap() {
-      if (params.id === "mock-id-123") {
+      if (id === "mock-id-123") {
         setNodes(initialNodes);
         setEdges(initialEdges);
         setIsLoading(false);
         return;
       }
       try {
-        const res = await fetch(`/api/roadmap/${params.id}`);
+        const res = await fetch(`/api/roadmap/${id}`);
         if (res.ok) {
           const data = await res.json();
           setNodes(data.nodes || []);
@@ -55,7 +56,7 @@ export default function RoadmapPage({ params }: { params: { id: string } }) {
       }
     }
     fetchRoadmap();
-  }, [params.id, setNodes, setEdges]);
+  }, [id, setNodes, setEdges]);
 
   const onNodeClick = (_: any, node: any) => {
     setSelectedNode(node);

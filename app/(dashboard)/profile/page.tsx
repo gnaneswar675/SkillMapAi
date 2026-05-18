@@ -8,7 +8,7 @@ export default function ProfilePage() {
         <p className="text-muted-foreground">Manage your profile and preferences.</p>
       </div>
       <div className="w-full max-w-4xl flex justify-center">
-        <UserProfile path="/profile" routing="path" />
+        <UserProfile routing="hash" />
       </div>
     </div>
   );
