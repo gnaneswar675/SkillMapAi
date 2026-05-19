@@ -1,13 +1,14 @@
 "use client";
 
-import { useSearchParams } from "next/navigation";
-import { use, useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { use, useEffect, useState, useRef } from "react";
 import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState } from "reactflow";
 import "reactflow/dist/style.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookmarkPlus, Share2, PlayCircle, FileText, CheckCircle2 } from "lucide-react";
+import { BookmarkPlus, Share2, PlayCircle, FileText, CheckCircle2, Sparkles, BrainCircuit } from "lucide-react";
 import { useTheme } from "next-themes";
+import { motion } from "framer-motion";
 
 const initialNodes = [
   { id: "1", position: { x: 250, y: 0 }, data: { label: "Introduction" }, type: "input" },
@@ -25,6 +26,7 @@ const initialEdges = [
 
 export default function RoadmapPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic") || "Topic Roadmap";
   const { theme } = useTheme();
@@ -33,37 +35,95 @@ export default function RoadmapPage({ params }: { params: Promise<{ id: string }
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isGenerating, setIsGenerating] = useState(id === "new");
+  
+  const hasFetched = useRef(false);
 
   useEffect(() => {
     async function fetchRoadmap() {
+      if (hasFetched.current) return;
+      hasFetched.current = true;
+      
       if (id === "mock-id-123") {
         setNodes(initialNodes);
         setEdges(initialEdges);
         setIsLoading(false);
         return;
       }
+
       try {
-        const res = await fetch(`/api/roadmap/${id}`);
-        if (res.ok) {
+        if (id === "new") {
+          // Trigger the generation
+          const res = await fetch("/api/generate-roadmap", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ topic }),
+          });
+          
+          if (!res.ok) {
+            const errorText = await res.text();
+            throw new Error(errorText || "Failed to generate roadmap");
+          }
+          
           const data = await res.json();
           setNodes(data.nodes || []);
           setEdges(data.edges || []);
+          // Replace URL without reloading the page
+          router.replace(`/roadmap/${data.id}?topic=${encodeURIComponent(topic)}`);
+        } else {
+          // Fetch existing
+          const res = await fetch(`/api/roadmap/${id}`);
+          if (res.ok) {
+            const data = await res.json();
+            setNodes(data.nodes || []);
+            setEdges(data.edges || []);
+          }
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error(error);
+        alert(error.message || "Something went wrong. Please try again.");
+        if (id === "new") router.push("/search");
       } finally {
         setIsLoading(false);
+        setIsGenerating(false);
       }
     }
+    
     fetchRoadmap();
-  }, [id, setNodes, setEdges]);
+  }, [id, topic, router, setNodes, setEdges]);
 
   const onNodeClick = (_: any, node: any) => {
     setSelectedNode(node);
   };
 
-  if (isLoading) {
-    return <div className="flex items-center justify-center h-[calc(100vh-4rem)] w-full">Loading roadmap...</div>;
+  if (isLoading || isGenerating) {
+    return (
+      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] w-full space-y-6">
+        <motion.div 
+          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }} 
+          transition={{ repeat: Infinity, duration: 2 }}
+          className="p-6 bg-primary/10 rounded-full"
+        >
+          <BrainCircuit className="h-16 w-16 text-primary" />
+        </motion.div>
+        <h2 className="text-2xl font-bold tracking-tight">
+          {isGenerating ? `Generating Roadmap for "${topic}"...` : "Loading your Roadmap..."}
+        </h2>
+        <p className="text-muted-foreground max-w-md text-center">
+          {isGenerating ? "Our AI is currently analyzing the topic, designing the curriculum, and building your personalized learning path." : "Fetching your saved progress and nodes..."}
+        </p>
+        {isGenerating && (
+          <div className="w-64 h-2 bg-secondary rounded-full overflow-hidden mt-4">
+            <motion.div 
+              className="h-full bg-primary"
+              initial={{ width: "0%" }}
+              animate={{ width: "100%" }}
+              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+            />
+          </div>
+        )}
+      </div>
+    );
   }
 
   return (
