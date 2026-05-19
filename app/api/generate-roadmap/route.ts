@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { GoogleGenerativeAI } from "@google/generative-ai";
+import Groq from "groq-sdk";
 import { prisma } from "@/lib/prisma";
 import { auth, currentUser } from "@clerk/nextjs/server";
 
-// Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+// Initialize Groq API for Llama 3.1
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
 
 export async function POST(req: Request) {
   try {
@@ -41,22 +41,14 @@ export async function POST(req: Request) {
       return NextResponse.json(existingRoadmap);
     }
 
-    if (!process.env.GEMINI_API_KEY || process.env.GEMINI_API_KEY === "your_gemini_api_key_here") {
-      return new NextResponse("Gemini API key is missing. Please add it to your .env file.", { status: 400 });
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === "your_groq_api_key_here") {
+      return new NextResponse("Llama/Groq API key is missing. Please add GROQ_API_KEY to your .env file.", { status: 400 });
     }
-
-    // Call Gemini AI
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      generationConfig: {
-        responseMimeType: "application/json",
-      }
-    });
 
     const prompt = `
 You are an expert curriculum designer. 
 Generate a detailed learning roadmap for the given topic: "${topic}". 
-Return ONLY a valid JSON object with this exact structure (no markdown formatting like \`\`\`json, just the raw JSON object):
+Return ONLY a valid JSON object with this exact structure:
 {
   "nodes": [
     { "id": "1", "position": { "x": 400, "y": 0 }, "data": { "label": "Topic Name" }, "type": "input" },
@@ -72,15 +64,27 @@ Return ONLY a valid JSON object with this exact structure (no markdown formattin
 Use 6-10 nodes. Spread them out vertically (y: 0, 150, 300, 450...) so they don't overlap. Make the last node type "output".
 `;
 
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    let aiContent = response.text();
+    // Call Groq API with Llama 3.1
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: "You are a JSON generator. You always return perfect, parseable JSON and nothing else."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      model: "llama-3.1-8b-instant",
+      response_format: { type: "json_object" },
+    });
 
-    // Clean the markdown formatting if Gemini included it
-    aiContent = aiContent.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+    let aiContent = chatCompletion.choices[0]?.message?.content || "";
+    aiContent = aiContent.trim();
 
     if (!aiContent) {
-      throw new Error("Failed to generate content from Gemini");
+      throw new Error("Failed to generate content from Llama 3.1");
     }
 
     const parsedContent = JSON.parse(aiContent);
@@ -101,14 +105,10 @@ Use 6-10 nodes. Spread them out vertically (y: 0, 150, 300, 450...) so they don'
   } catch (error: any) {
     console.error("[ROADMAP_GENERATE_ERROR]", error);
 
-    // Handle Gemini Quota / Rate Limit Error
-    if (error?.status === 429 || error?.message?.includes("429 Too Many Requests") || error?.message?.includes("Quota exceeded")) {
-      return new NextResponse(
-        "Gemini API quota exceeded or rate limited. Your Google Cloud project may require billing to be enabled, or you are in a region without free tier access. Please check your Google AI Studio account.",
-        { status: 429 }
-      );
+    if (error?.status === 401) {
+      return new NextResponse("Invalid Llama API key. Please check your credentials.", { status: 401 });
     }
-    
+
     if (error?.message) {
       return new NextResponse(error.message, { status: 500 });
     }
