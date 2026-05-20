@@ -12,11 +12,18 @@ export default async function DashboardPage() {
     redirect("/sign-in");
   }
 
-  const userRoadmaps = await prisma.roadmap.findMany({
-    where: { authorId: userId },
-    orderBy: { createdAt: 'desc' },
-    take: 6
+  // Find the DB user using Clerk userId to get internal cuid
+  const dbUser = await prisma.user.findUnique({
+    where: { userId }
   });
+
+  const userRoadmaps = dbUser
+    ? await prisma.roadmap.findMany({
+        where: { authorId: dbUser.id },
+        orderBy: { createdAt: 'desc' },
+        take: 6
+      })
+    : [];
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">

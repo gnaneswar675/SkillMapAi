@@ -10,6 +10,9 @@ import { BookmarkPlus, Share2, PlayCircle, FileText, CheckCircle2, Sparkles, Bra
 import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 
+const nodeTypes = {};
+const edgeTypes = {};
+
 const initialNodes = [
   { id: "1", position: { x: 250, y: 0 }, data: { label: "Introduction" }, type: "input" },
   { id: "2", position: { x: 100, y: 100 }, data: { label: "Core Concepts" } },
@@ -149,6 +152,8 @@ export default function RoadmapPage({ params }: { params: Promise<{ id: string }
         <ReactFlow
           nodes={nodes}
           edges={edges}
+          nodeTypes={nodeTypes}
+          edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
           onNodeClick={onNodeClick}
