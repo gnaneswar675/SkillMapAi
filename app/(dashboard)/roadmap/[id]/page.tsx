@@ -6,13 +6,13 @@ import ReactFlow, { Background, Controls, MiniMap, useNodesState, useEdgesState,
 import "reactflow/dist/style.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  BookmarkPlus, 
-  Share2, 
-  PlayCircle, 
-  FileText, 
-  CheckCircle2, 
-  Circle, 
+import {
+  BookmarkPlus,
+  Share2,
+  PlayCircle,
+  FileText,
+  CheckCircle2,
+  Circle,
   BrainCircuit,
   Copy,
   Check,
@@ -56,15 +56,13 @@ function ConceptAccordionItem({ concept }: { concept: any }) {
       >
         <span>{concept.title}</span>
         <ChevronDown
-          className={`h-4 w-4 text-white/40 transition-transform duration-200 ${
-            isOpen ? "transform rotate-180" : ""
-          }`}
+          className={`h-4 w-4 text-white/40 transition-transform duration-200 ${isOpen ? "transform rotate-180" : ""
+            }`}
         />
       </button>
       <div
-        className={`transition-all duration-200 ease-in-out overflow-hidden ${
-          isOpen ? "max-h-96 opacity-100 p-4 pt-0 border-t border-white/[0.06]" : "max-h-0 opacity-0"
-        }`}
+        className={`transition-all duration-200 ease-in-out overflow-hidden ${isOpen ? "max-h-96 opacity-100 p-4 pt-0 border-t border-white/[0.06]" : "max-h-0 opacity-0"
+          }`}
       >
         <p className="text-xs text-white/50 leading-relaxed mt-2">
           {concept.description}
@@ -126,9 +124,8 @@ function InterviewQuestionCard({ q, index }: { q: any; index: number }) {
       </button>
 
       <div
-        className={`transition-all duration-200 ease-in-out overflow-hidden ${
-          isOpen ? "max-h-[500px] opacity-100 mt-3 p-3 bg-white/[0.02] rounded-lg text-xs text-white/50 leading-relaxed border border-white/[0.06]" : "max-h-0 opacity-0"
-        }`}
+        className={`transition-all duration-200 ease-in-out overflow-hidden ${isOpen ? "max-h-[500px] opacity-100 mt-3 p-3 bg-white/[0.02] rounded-lg text-xs text-white/50 leading-relaxed border border-white/[0.06]" : "max-h-0 opacity-0"
+          }`}
       >
         {q.answer}
       </div>
@@ -169,14 +166,14 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
   const searchParams = useSearchParams();
   const topic = searchParams.get("topic") || "Topic Roadmap";
   const { theme } = useTheme();
-  
+
   const { setCenter, fitView, getZoom } = useReactFlow();
 
   // Close the left menu bar by default on entering the roadmap page
   useEffect(() => {
     setOpen(false);
   }, [setOpen]);
-  
+
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [selectedNode, setSelectedNode] = useState<any>(null);
@@ -195,7 +192,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
   const [panelWidth, setPanelWidth] = useState(450);
   const [isResizing, setIsResizing] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  
+
   const hasFetched = useRef(false);
 
   // Detect mobile viewports
@@ -279,17 +276,17 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
             : (node.data.resources && node.data.resources.length > 0)
               ? node.data.resources
               : [
-                  {
-                    title: `GeeksforGeeks: Learn ${node.data.label}`,
-                    url: `https://www.geeksforgeeks.org/search/${encodeURIComponent(node.data.label)}/`,
-                    type: "article"
-                  },
-                  {
-                    title: `Google Search: ${node.data.label}`,
-                    url: `https://www.google.com/search?q=${encodeURIComponent(node.data.label + " geeksforgeeks")}`,
-                    type: "search"
-                  }
-                ],
+                {
+                  title: `GeeksforGeeks: Learn ${node.data.label}`,
+                  url: `https://www.geeksforgeeks.org/search/${encodeURIComponent(node.data.label)}/`,
+                  type: "article"
+                },
+                {
+                  title: `Google Search: ${node.data.label}`,
+                  url: `https://www.google.com/search?q=${encodeURIComponent(node.data.label + " geeksforgeeks")}`,
+                  type: "search"
+                }
+              ],
           topicId: topicItem?.id,
           completed: isCompleted,
         },
@@ -304,7 +301,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
     async function fetchRoadmap() {
       if (hasFetched.current) return;
       hasFetched.current = true;
-      
+
       if (id === "mock-id-123") {
         setNodes(initialNodes.map(n => ({
           ...n,
@@ -329,12 +326,12 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ topic }),
           });
-          
+
           if (!res.ok) {
             const errorText = await res.text();
             throw new Error(errorText || "Failed to generate roadmap");
           }
-          
+
           const data = await res.json();
           processNodesAndEdges(data);
           setIsSaved(data.isSaved || false);
@@ -356,7 +353,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
         setIsGenerating(false);
       }
     }
-    
+
     fetchRoadmap();
   }, [id, topic, router, setNodes, setEdges]);
 
@@ -392,13 +389,13 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   const onNodeClick = (_: any, node: any) => {
     setSelectedNode(node);
-    
+
     // Smoothly center the selected node in the visible canvas area
     if (node && node.position) {
       const zoom = getZoom() || 1.1;
       const targetX = node.position.x + 120; // Center offset for customNode width
       const targetY = node.position.y + 30;  // Center offset for customNode height
-      
+
       // Delay to allow container resize transition/mount to start
       setTimeout(() => {
         setCenter(targetX, targetY, { zoom, duration: 600 });
@@ -508,16 +505,16 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
   const handleSaveToggle = async () => {
     const originalSavedState = isSaved;
     const newSavedState = !originalSavedState;
-    
+
     setIsSaved(newSavedState);
-    
+
     try {
       const res = await fetch(`/api/roadmap/${id}/save`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ saved: newSavedState }),
       });
-      
+
       if (!res.ok) {
         throw new Error("Failed to toggle save status");
       }
@@ -530,38 +527,77 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   if (isLoading || isGenerating) {
     return (
-      <div className="flex flex-col items-center justify-center h-screen w-full space-y-6 bg-black relative overflow-hidden">
-        {/* Glow backdrop */}
+      <div className="flex flex-col items-center justify-center min-h-screen w-full bg-black relative overflow-hidden px-4 py-8">
+        {/* Glow backdrop - multi-layered for rich aesthetics */}
         <div
-          className="absolute inset-0 pointer-events-none -z-10"
+          className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] md:w-[600px] h-[280px] md:h-[600px] pointer-events-none -z-10 rounded-full"
           style={{
-            background: "radial-gradient(circle at center, rgba(99, 102, 241, 0.04) 0%, transparent 70%)",
+            background: "radial-gradient(circle at center, rgba(99, 102, 241, 0.08) 0%, rgba(6, 182, 212, 0.02) 50%, transparent 70%)",
             filter: "blur(60px)",
           }}
         />
-        <motion.div 
-          animate={{ scale: [1, 1.05, 1] }} 
-          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
-          className="p-6 bg-indigo-500/10 rounded-full border border-indigo-500/20 shadow-[0_0_50px_rgba(99,102,241,0.2)]"
-        >
-          <BrainCircuit className="h-16 w-16 text-indigo-400" />
-        </motion.div>
-        <h2 className="text-2xl font-bold tracking-tight text-white/90">
-          {isGenerating ? `Generating Roadmap for "${topic}"...` : "Loading your Roadmap..."}
-        </h2>
-        <p className="text-white/40 max-w-md text-center text-sm px-4">
-          {isGenerating ? "Our AI is currently analyzing the topic, designing the curriculum, and building your personalized learning path." : "Fetching your saved progress and nodes..."}
-        </p>
-        {isGenerating && (
-          <div className="w-64 h-2 bg-white/[0.06] rounded-full overflow-hidden mt-4">
-            <motion.div 
-              className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400"
-              initial={{ width: "0%" }}
-              animate={{ width: "100%" }}
-              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
-            />
+
+        <div className="max-w-md w-full text-center space-y-6 z-10 flex flex-col items-center justify-center">
+          {/* Glowing Animated Icon */}
+          <motion.div
+            animate={{
+              scale: [1, 1.04, 1],
+              rotate: [0, 4, -4, 0],
+            }}
+            transition={{
+              repeat: Infinity,
+              duration: 3,
+              ease: "easeInOut"
+            }}
+            className="p-6 bg-indigo-500/10 rounded-full border border-indigo-500/20 shadow-[0_0_40px_rgba(99,102,241,0.25)] flex items-center justify-center w-22 h-22 md:w-26 md:h-26"
+          >
+            <BrainCircuit className="h-10 w-10 md:h-12 md:w-12 text-indigo-400 animate-pulse" />
+          </motion.div>
+
+          {/* Main Title - Responsive font size and word breaking */}
+          <div className="space-y-2 px-2 w-full">
+            <h2 className="text-lg md:text-2xl font-bold tracking-tight text-white/95 leading-snug break-words">
+              {isGenerating ? (
+                <>
+                  Generating Path for <span className="text-indigo-400 block mt-1 leading-normal italic">"{topic}"</span>
+                </>
+              ) : (
+                "Loading your Roadmap..."
+              )}
+            </h2>
           </div>
-        )}
+
+          {/* Subtitle description */}
+          <p className="text-xs md:text-sm text-white/40 leading-relaxed max-w-sm px-2">
+            {isGenerating
+              ? "Our AI is currently analyzing the topic, structuring the curriculum, and building your personalized interactive learning tree."
+              : "Fetching your saved progress and nodes..."}
+          </p>
+
+          {/* Progress bar container */}
+          {isGenerating && (
+            <div className="w-full max-w-[220px] md:max-w-[260px] h-1.5 bg-white/[0.06] rounded-full overflow-hidden mt-4 border border-white/[0.04] shadow-inner">
+              <motion.div
+                className="h-full bg-gradient-to-r from-indigo-500 via-violet-500 to-cyan-400"
+                initial={{ width: "0%" }}
+                animate={{ width: "100%" }}
+                transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
+              />
+            </div>
+          )}
+
+          {/* Status logs indicator - premium touch */}
+          {isGenerating && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: [0.4, 0.8, 0.4] }}
+              transition={{ duration: 2.5, repeat: Infinity }}
+              className="text-[10px] text-indigo-400/60 font-mono tracking-wider pt-2"
+            >
+
+            </motion.div>
+          )}
+        </div>
       </div>
     );
   }
@@ -571,9 +607,8 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
       {/* Left side: Canvas and Header */}
       <div className="flex-1 h-full flex flex-col relative min-w-0">
         {/* Header Panel with dynamic offset based on Sidebar collapse */}
-        <div className={`absolute top-4 right-4 md:right-8 z-10 flex justify-between items-center bg-black/40 backdrop-blur-md p-3 md:p-4 rounded-2xl border border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.2)] transition-all duration-300 ${
-          isOpen ? "left-4 md:left-8" : "left-16 md:left-16"
-        }`}>
+        <div className={`absolute top-4 right-4 md:right-8 z-10 flex justify-between items-center bg-black/40 backdrop-blur-md p-3 md:p-4 rounded-2xl border border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.2)] transition-all duration-300 ${isOpen ? "left-4 md:left-8" : "left-16 md:left-16"
+          }`}>
           <div>
             <h1 className="text-lg md:text-2xl font-bold flex flex-wrap items-center gap-2">
               <span className="text-white/90 line-clamp-1 max-w-[150px] md:max-w-none">{topic}</span>
@@ -586,8 +621,8 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
             <p className="text-[10px] md:text-xs text-white/40">AI-Generated Learning Path</p>
           </div>
           <div className="flex gap-2">
-            <Button 
-              size="sm" 
+            <Button
+              size="sm"
               className={cn(
                 "gap-1.5 rounded-xl transition-all text-xs md:text-sm px-3 py-1.5",
                 isSaved
@@ -596,7 +631,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
               )}
               onClick={handleSaveToggle}
             >
-              <BookmarkPlus className={cn("h-3.5 w-3.5 md:h-4 md:w-4", isSaved ? "fill-white" : "")} /> 
+              <BookmarkPlus className={cn("h-3.5 w-3.5 md:h-4 md:w-4", isSaved ? "fill-white" : "")} />
               <span className="hidden sm:inline">{isSaved ? "Saved" : "Save Path"}</span>
             </Button>
           </div>
@@ -618,8 +653,8 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
             <Background color={theme === "dark" ? "#222" : "#ccc"} gap={16} />
             <Controls className="mb-4 mr-4" />
             {!isMobile && (
-              <MiniMap 
-                nodeColor={theme === "dark" ? "#333" : "#eee"} 
+              <MiniMap
+                nodeColor={theme === "dark" ? "#333" : "#eee"}
                 maskColor={theme === "dark" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)"}
               />
             )}
@@ -629,14 +664,14 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
 
       {/* Right side: Topic Details tabs panel */}
       {selectedNode && (
-        <div 
-          style={{ 
+        <div
+          style={{
             width: isMobile ? "100%" : `${panelWidth}px`,
-            height: isMobile ? "70vh" : "100%" 
+            height: isMobile ? "70vh" : "100%"
           }}
           className={cn(
             "bg-black/85 backdrop-blur-xl border-white/[0.08] flex flex-col overflow-hidden shadow-2xl z-40",
-            isMobile 
+            isMobile
               ? "fixed bottom-0 left-0 right-0 border-t rounded-t-3xl animate-in slide-in-from-bottom duration-300"
               : "h-full border-l animate-in slide-in-from-right duration-300 shrink-0 relative max-w-full"
           )}
@@ -705,7 +740,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
               );
             })}
           </div>
-          
+
           {/* Scrollable Tab Contents */}
           <div className="flex-1 overflow-y-auto p-4 pl-6 pb-20">
             {notesLoading ? (
@@ -818,11 +853,10 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                         <button
                           key={filter}
                           onClick={() => setDifficultyFilter(filter)}
-                          className={`text-[10px] font-semibold capitalize px-2.5 py-1 rounded-md transition-colors ${
-                            difficultyFilter === filter
+                          className={`text-[10px] font-semibold capitalize px-2.5 py-1 rounded-md transition-colors ${difficultyFilter === filter
                               ? "bg-background text-foreground shadow-sm border"
                               : "text-muted-foreground hover:text-foreground"
-                          }`}
+                            }`}
                         >
                           {filter === "all" ? "All" : filter}
                         </button>
@@ -835,7 +869,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                         const beginnerQs = notes.interviewQuestions?.beginner || [];
                         const intermediateQs = notes.interviewQuestions?.intermediate || [];
                         const advancedQs = notes.interviewQuestions?.advanced || [];
-                        
+
                         let filteredQs = [];
                         if (difficultyFilter === "all") {
                           filteredQs = [...beginnerQs, ...intermediateQs, ...advancedQs];
@@ -900,15 +934,14 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
               </div>
             )}
           </div>
-          
+
           {/* Side Panel Footer */}
           <div className="p-4 pl-6 border-t border-white/[0.08] bg-white/[0.01]">
             <Button
-              className={`w-full gap-2 rounded-xl transition-all ${
-                selectedNode.data.completed
+              className={`w-full gap-2 rounded-xl transition-all ${selectedNode.data.completed
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                   : "bg-indigo-600 hover:bg-indigo-500 text-white hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-              }`}
+                }`}
               onClick={() => toggleProgress(selectedNode)}
             >
               {selectedNode.data.completed ? (
