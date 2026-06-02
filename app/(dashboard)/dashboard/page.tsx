@@ -25,6 +25,17 @@ export default async function DashboardPage() {
       })
     : [];
 
+  const userProgress = dbUser
+    ? await prisma.progress.findMany({
+        where: {
+          userId: dbUser.id,
+          completed: true,
+        },
+      })
+    : [];
+
+  const totalCompletedTopics = userProgress.length;
+
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
       <div className="flex justify-between items-center">
@@ -56,8 +67,10 @@ export default async function DashboardPage() {
             <Trophy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">0</div>
-            <p className="text-xs text-muted-foreground">Start tracking your progress</p>
+            <div className="text-2xl font-bold">{totalCompletedTopics}</div>
+            <p className="text-xs text-muted-foreground">
+              {totalCompletedTopics > 0 ? "Keep learning!" : "Start tracking your progress"}
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -84,30 +97,36 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-            {userRoadmaps.map((roadmap) => (
-              <Link href={`/roadmap/${roadmap.id}?topic=${encodeURIComponent(roadmap.topic)}`} key={roadmap.id}>
-                <Card className="hover:border-primary/50 transition-colors cursor-pointer group h-full">
-                  <CardHeader>
-                    <CardTitle className="line-clamp-1">{roadmap.title}</CardTitle>
-                    <CardDescription>{(roadmap.nodes as any[])?.length || 0} topics to master</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Progress</span>
-                        <span className="font-medium">0%</span>
+            {userRoadmaps.map((roadmap) => {
+              const completedForRoadmap = userProgress.filter((p) => p.roadmapId === roadmap.id).length;
+              const totalTopics = Array.isArray(roadmap.nodes) ? roadmap.nodes.length : 0;
+              const progressPercent = totalTopics > 0 ? Math.round((completedForRoadmap / totalTopics) * 100) : 0;
+
+              return (
+                <Link href={`/roadmap/${roadmap.id}?topic=${encodeURIComponent(roadmap.topic)}`} key={roadmap.id}>
+                  <Card className="hover:border-primary/50 transition-colors cursor-pointer group h-full">
+                    <CardHeader>
+                      <CardTitle className="line-clamp-1">{roadmap.title}</CardTitle>
+                      <CardDescription>{totalTopics} topics to master</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-muted-foreground">Progress</span>
+                          <span className="font-medium">{progressPercent}%</span>
+                         </div>
+                        <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
+                          <div 
+                            className="h-full bg-primary transition-all group-hover:bg-primary/80" 
+                            style={{ width: `${progressPercent}%` }} 
+                          />
+                        </div>
                       </div>
-                      <div className="h-2 w-full bg-secondary rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-primary transition-all group-hover:bg-primary/80" 
-                          style={{ width: `0%` }} 
-                        />
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </Link>
-            ))}
+                    </CardContent>
+                  </Card>
+                </Link>
+              );
+            })}
           </div>
         )}
       </div>
