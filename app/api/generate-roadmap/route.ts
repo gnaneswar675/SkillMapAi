@@ -129,7 +129,16 @@ Return ONLY a valid JSON object with this exact structure:
   ],
   "description": "A short 1-2 sentence summary of this learning path."
 }
-Use 6-10 nodes. Spread them out vertically (y: 0, 150, 300, 450...) so they don't overlap. Make the last node type "output".
+
+CRITICAL STRUCTURE INSTRUCTIONS:
+1. The roadmap MUST be generated as a **branching tree/graph structure**, NOT a single linear vertical line.
+2. Introduce branching tracks (e.g. Node 1 splits into Node 2 on x: 200 and Node 3 on x: 600, representing parallel or optional skills to learn), which can then merge back into a single required node (e.g. Node 2 and Node 3 both connect to Node 4 on x: 400).
+3. Use 6-10 nodes in total.
+4. Position nodes cleanly on a vertical tree layout:
+   - Root nodes at the top (y: 0, centered on x: 400)
+   - Left-branched nodes (e.g. x: 150 to 250) and Right-branched nodes (e.g. x: 550 to 650) at subsequent vertical intervals (y: 150, 300, 450...)
+   - End node at the bottom (y: max_y, centered on x: 400, type "output")
+5. Provide a minimum spacing of 200px horizontally and 150px vertically between adjacent nodes to prevent overlaps.
 
 CRITICAL INSTRUCTIONS FOR RESOURCES:
 1. You MUST generate 2-3 REAL, SPECIFIC, AND FUNCTIONAL resource links for each node.
