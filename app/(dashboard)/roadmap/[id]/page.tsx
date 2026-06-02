@@ -194,12 +194,23 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
   // Dynamic panel resize states
   const [panelWidth, setPanelWidth] = useState(450);
   const [isResizing, setIsResizing] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
   
   const hasFetched = useRef(false);
 
+  // Detect mobile viewports
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    handleResize();
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   // Handle panel resizing
   useEffect(() => {
-    if (!isResizing) return;
+    if (!isResizing || isMobile) return;
 
     const handleMouseMove = (e: MouseEvent) => {
       const newWidth = window.innerWidth - e.clientX;
@@ -247,7 +258,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
       document.body.style.userSelect = "";
       document.body.style.cursor = "";
     };
-  }, [isResizing, fitView]);
+  }, [isResizing, isMobile, fitView]);
 
   const processNodesAndEdges = (roadmapData: any) => {
     const dbProgress = roadmapData.progress || [];
@@ -560,32 +571,33 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
       {/* Left side: Canvas and Header */}
       <div className="flex-1 h-full flex flex-col relative min-w-0">
         {/* Header Panel with dynamic offset based on Sidebar collapse */}
-        <div className={`absolute top-4 right-4 md:right-8 z-10 flex justify-between items-center bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.2)] transition-all duration-300 ${
+        <div className={`absolute top-4 right-4 md:right-8 z-10 flex justify-between items-center bg-black/40 backdrop-blur-md p-3 md:p-4 rounded-2xl border border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.2)] transition-all duration-300 ${
           isOpen ? "left-4 md:left-8" : "left-16 md:left-16"
         }`}>
           <div>
-            <h1 className="text-2xl font-bold flex flex-wrap items-center gap-3">
-              <span className="text-white/90">{topic}</span>
+            <h1 className="text-lg md:text-2xl font-bold flex flex-wrap items-center gap-2">
+              <span className="text-white/90 line-clamp-1 max-w-[150px] md:max-w-none">{topic}</span>
               {nodes.length > 0 && (
-                <span className="text-sm font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  {nodes.filter(n => n.data?.completed).length}/{nodes.length} Completed ({Math.round((nodes.filter(n => n.data?.completed).length / nodes.length) * 100)}%)
+                <span className="text-[10px] md:text-sm font-medium px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  {nodes.filter(n => n.data?.completed).length}/{nodes.length} ({Math.round((nodes.filter(n => n.data?.completed).length / nodes.length) * 100)}%)
                 </span>
               )}
             </h1>
-            <p className="text-sm text-white/40">AI-Generated Learning Path</p>
+            <p className="text-[10px] md:text-xs text-white/40">AI-Generated Learning Path</p>
           </div>
           <div className="flex gap-2">
             <Button 
               size="sm" 
-              className={`gap-2 rounded-xl transition-all ${
+              className={cn(
+                "gap-1.5 rounded-xl transition-all text-xs md:text-sm px-3 py-1.5",
                 isSaved
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white"
                   : "bg-indigo-600 text-white hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
-              }`}
+              )}
               onClick={handleSaveToggle}
             >
-              <BookmarkPlus className={`h-4 w-4 ${isSaved ? "fill-white" : ""}`} /> 
-              {isSaved ? "Saved" : "Save Path"}
+              <BookmarkPlus className={cn("h-3.5 w-3.5 md:h-4 md:w-4", isSaved ? "fill-white" : "")} /> 
+              <span className="hidden sm:inline">{isSaved ? "Saved" : "Save Path"}</span>
             </Button>
           </div>
         </div>
@@ -605,10 +617,12 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
           >
             <Background color={theme === "dark" ? "#222" : "#ccc"} gap={16} />
             <Controls className="mb-4 mr-4" />
-            <MiniMap 
-              nodeColor={theme === "dark" ? "#333" : "#eee"} 
-              maskColor={theme === "dark" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)"}
-            />
+            {!isMobile && (
+              <MiniMap 
+                nodeColor={theme === "dark" ? "#333" : "#eee"} 
+                maskColor={theme === "dark" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)"}
+              />
+            )}
           </ReactFlow>
         </div>
       </div>
@@ -616,22 +630,38 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
       {/* Right side: Topic Details tabs panel */}
       {selectedNode && (
         <div 
-          style={{ width: `${panelWidth}px` }}
-          className="h-full bg-black/60 backdrop-blur-md border-l border-white/[0.08] flex flex-col animate-in slide-in-from-right duration-300 overflow-hidden shrink-0 relative max-w-full shadow-2xl"
+          style={{ 
+            width: isMobile ? "100%" : `${panelWidth}px`,
+            height: isMobile ? "70vh" : "100%" 
+          }}
+          className={cn(
+            "bg-black/85 backdrop-blur-xl border-white/[0.08] flex flex-col overflow-hidden shadow-2xl z-40",
+            isMobile 
+              ? "fixed bottom-0 left-0 right-0 border-t rounded-t-3xl animate-in slide-in-from-bottom duration-300"
+              : "h-full border-l animate-in slide-in-from-right duration-300 shrink-0 relative max-w-full"
+          )}
         >
-          {/* Resize Handle */}
-          <div
-            onMouseDown={(e) => {
-              e.preventDefault();
-              setIsResizing(true);
-            }}
-            onTouchStart={() => {
-              setIsResizing(true);
-            }}
-            className={`absolute top-0 left-0 w-1.5 hover:w-2 h-full cursor-col-resize z-50 transition-all ${
-              isResizing ? "bg-indigo-500 w-2" : "bg-transparent hover:bg-indigo-500/40 active:bg-indigo-500"
-            }`}
-          />
+          {/* Mobile Drag Indicator */}
+          {isMobile && (
+            <div className="w-12 h-1.5 bg-white/20 rounded-full mx-auto my-3 shrink-0" />
+          )}
+
+          {/* Resize Handle (only visible on desktop) */}
+          {!isMobile && (
+            <div
+              onMouseDown={(e) => {
+                e.preventDefault();
+                setIsResizing(true);
+              }}
+              onTouchStart={() => {
+                setIsResizing(true);
+              }}
+              className={cn(
+                "absolute top-0 left-0 w-1.5 hover:w-2 h-full cursor-col-resize z-50 transition-all",
+                isResizing ? "bg-indigo-500 w-2" : "bg-transparent hover:bg-indigo-500/40 active:bg-indigo-500"
+              )}
+            />
+          )}
 
           {/* Sidebar Header */}
           <div className="p-4 border-b border-white/[0.08] flex justify-between items-center bg-white/[0.01] pl-6">
@@ -677,7 +707,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
           
           {/* Scrollable Tab Contents */}
-          <div className="flex-1 overflow-y-auto p-4 pl-6">
+          <div className="flex-1 overflow-y-auto p-4 pl-6 pb-20">
             {notesLoading ? (
               <div className="space-y-4 animate-pulse">
                 <div className="h-6 bg-muted rounded w-2/3"></div>

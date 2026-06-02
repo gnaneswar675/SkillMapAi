@@ -4,6 +4,8 @@ import { Sidebar } from "@/components/layout/sidebar";
 import { useSidebarStore } from "@/lib/store/use-sidebar-store";
 import { Menu } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { usePathname } from "next/navigation";
+import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({
   children,
@@ -11,6 +13,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }) {
   const { isOpen, toggle } = useSidebarStore();
+  const pathname = usePathname();
+  const isRoadmapPage = pathname?.startsWith("/roadmap/");
 
   return (
     <div className="h-full relative flex overflow-hidden">
@@ -39,7 +43,10 @@ export default function DashboardLayout({
       >
         {/* Toggle Button Container for opening the menu */}
         {!isOpen && (
-          <div className="fixed top-4 left-4 z-[90]">
+          <div className={cn(
+            "fixed left-4 z-[90] transition-all duration-300",
+            isRoadmapPage ? "top-[26px] md:top-[36px]" : "top-4"
+          )}>
             <Button
               variant="outline"
               size="icon"
