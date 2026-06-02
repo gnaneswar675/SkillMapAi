@@ -70,7 +70,7 @@ export function Sidebar() {
         </div>
         <div className="space-y-1">
           {routes.map((route) => (
-            <Link
+            <a
               key={route.href}
               href={route.href}
               className={cn(
@@ -82,7 +82,7 @@ export function Sidebar() {
                 <route.icon className={cn("h-5 w-5 mr-3", route.active ? "text-primary" : "text-muted-foreground")} />
                 {route.label}
               </div>
-            </Link>
+            </a>
           ))}
         </div>
       </div>
