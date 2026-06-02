@@ -4,21 +4,13 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { BrainCircuit, Search, LayoutDashboard, Bookmark, User, Moon, Sun, ChevronLeft } from "lucide-react";
-import { useTheme } from "next-themes";
+import { BrainCircuit, Search, LayoutDashboard, Bookmark, User, ChevronLeft } from "lucide-react";
 import { UserButton } from "@clerk/nextjs";
-import { useEffect, useState } from "react";
 import { useSidebarStore } from "@/lib/store/use-sidebar-store";
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const { toggle } = useSidebarStore();
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const routes = [
     {
@@ -87,18 +79,6 @@ export function Sidebar() {
         </div>
       </div>
       <div className="px-6 py-4 border-t flex flex-col gap-4">
-        {mounted && (
-          <div className="flex items-center justify-between">
-            <span className="text-sm text-muted-foreground font-medium">Theme</span>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            >
-              {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-            </Button>
-          </div>
-        )}
         <div className="flex items-center gap-x-2">
           <UserButton />
           <span className="text-sm font-medium">Account</span>

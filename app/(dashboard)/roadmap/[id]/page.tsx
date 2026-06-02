@@ -24,6 +24,7 @@ import { useTheme } from "next-themes";
 import { motion } from "framer-motion";
 import CustomNode from "@/components/roadmap/CustomNode";
 import { useSidebarStore } from "@/lib/store/use-sidebar-store";
+import { cn } from "@/lib/utils";
 
 const nodeTypes = {
   customNode: CustomNode,
@@ -48,24 +49,24 @@ const initialEdges = [
 function ConceptAccordionItem({ concept }: { concept: any }) {
   const [isOpen, setIsOpen] = useState(false);
   return (
-    <div className="border border-border bg-muted/20 rounded-xl overflow-hidden mb-3 transition-all hover:border-primary/30">
+    <div className="border border-white/[0.06] bg-white/[0.01] rounded-xl overflow-hidden mb-3 transition-all hover:border-indigo-500/30 hover:bg-white/[0.02]">
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full p-4 flex justify-between items-center text-left font-semibold text-sm focus:outline-none"
+        className="w-full p-4 flex justify-between items-center text-left font-semibold text-sm text-white/90 focus:outline-none"
       >
         <span>{concept.title}</span>
         <ChevronDown
-          className={`h-4 w-4 text-muted-foreground transition-transform duration-200 ${
+          className={`h-4 w-4 text-white/40 transition-transform duration-200 ${
             isOpen ? "transform rotate-180" : ""
           }`}
         />
       </button>
       <div
         className={`transition-all duration-200 ease-in-out overflow-hidden ${
-          isOpen ? "max-h-96 opacity-100 p-4 pt-0 border-t border-border/30" : "max-h-0 opacity-0"
+          isOpen ? "max-h-96 opacity-100 p-4 pt-0 border-t border-white/[0.06]" : "max-h-0 opacity-0"
         }`}
       >
-        <p className="text-xs text-muted-foreground leading-relaxed mt-2">
+        <p className="text-xs text-white/50 leading-relaxed mt-2">
           {concept.description}
         </p>
       </div>
@@ -88,17 +89,17 @@ function InterviewQuestionCard({ q, index }: { q: any; index: number }) {
     switch (diff?.toLowerCase()) {
       case "hard":
       case "advanced":
-        return "bg-rose-500/10 text-rose-500 border-rose-500/20";
+        return "bg-rose-500/10 text-rose-400 border-rose-500/20";
       case "medium":
       case "intermediate":
-        return "bg-amber-500/10 text-amber-500 border-amber-500/20";
+        return "bg-amber-500/10 text-amber-400 border-amber-500/20";
       default:
-        return "bg-emerald-500/10 text-emerald-500 border-emerald-500/20";
+        return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
     }
   };
 
   return (
-    <div className="border border-border bg-muted/25 rounded-xl p-4 mb-3 transition-colors hover:border-primary/20">
+    <div className="border border-white/[0.06] bg-white/[0.01] rounded-xl p-4 mb-3 transition-colors hover:border-indigo-500/30 hover:bg-white/[0.02]">
       <div className="flex justify-between items-start gap-3 mb-2">
         <span className={`text-[10px] font-semibold tracking-wider uppercase px-2 py-0.5 rounded-full border ${getDifficultyClass(q.difficulty)}`}>
           {q.difficulty || "Easy"}
@@ -106,27 +107,27 @@ function InterviewQuestionCard({ q, index }: { q: any; index: number }) {
         <Button
           variant="ghost"
           size="icon"
-          className="h-6 w-6 text-muted-foreground hover:text-primary"
+          className="h-6 w-6 text-white/40 hover:text-white hover:bg-white/10"
           onClick={handleCopy}
         >
-          {copied ? <Check className="h-3.5 w-3.5 text-emerald-500" /> : <Copy className="h-3.5 w-3.5" />}
+          {copied ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
         </Button>
       </div>
 
-      <h4 className="font-semibold text-sm leading-snug mb-2">
+      <h4 className="font-semibold text-sm leading-snug mb-2 text-white/90">
         Q{index + 1}: {q.question}
       </h4>
 
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="text-xs text-primary font-medium hover:underline flex items-center gap-1 focus:outline-none"
+        className="text-xs text-indigo-400 font-medium hover:underline flex items-center gap-1 focus:outline-none"
       >
         {isOpen ? "Hide Answer" : "Show Answer"}
       </button>
 
       <div
         className={`transition-all duration-200 ease-in-out overflow-hidden ${
-          isOpen ? "max-h-[500px] opacity-100 mt-3 p-3 bg-muted/50 rounded-lg text-xs text-muted-foreground leading-relaxed border border-border/30" : "max-h-0 opacity-0"
+          isOpen ? "max-h-[500px] opacity-100 mt-3 p-3 bg-white/[0.02] rounded-lg text-xs text-white/50 leading-relaxed border border-white/[0.06]" : "max-h-0 opacity-0"
         }`}
       >
         {q.answer}
@@ -137,23 +138,23 @@ function InterviewQuestionCard({ q, index }: { q: any; index: number }) {
 
 function CommonMistakeCard({ item }: { item: any }) {
   return (
-    <div className="border border-border bg-muted/10 rounded-xl p-4 mb-3 space-y-3">
+    <div className="border border-white/[0.06] bg-white/[0.01] rounded-xl p-4 mb-3 space-y-3">
       <div className="bg-rose-500/5 border border-rose-500/20 rounded-lg p-3">
-        <div className="flex items-start gap-2 text-rose-500 font-semibold text-xs mb-1">
+        <div className="flex items-start gap-2 text-rose-400 font-semibold text-xs mb-1">
           <XCircle className="h-4 w-4 shrink-0 mt-0.5" />
           <span>Mistake</span>
         </div>
-        <p className="text-xs text-muted-foreground leading-relaxed pl-6">
+        <p className="text-xs text-white/60 leading-relaxed pl-6">
           {item.mistake}
         </p>
       </div>
 
       <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-3">
-        <div className="flex items-start gap-2 text-emerald-500 font-semibold text-xs mb-1">
+        <div className="flex items-start gap-2 text-emerald-400 font-semibold text-xs mb-1">
           <CheckCircle2 className="h-4 w-4 shrink-0 mt-0.5" />
           <span>Solution / Best Practice</span>
         </div>
-        <p className="text-xs text-muted-foreground leading-relaxed pl-6">
+        <p className="text-xs text-white/60 leading-relaxed pl-6">
           {item.solution}
         </p>
       </div>
@@ -518,27 +519,35 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
 
   if (isLoading || isGenerating) {
     return (
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-4rem)] w-full space-y-6">
+      <div className="flex flex-col items-center justify-center h-screen w-full space-y-6 bg-black relative overflow-hidden">
+        {/* Glow backdrop */}
+        <div
+          className="absolute inset-0 pointer-events-none -z-10"
+          style={{
+            background: "radial-gradient(circle at center, rgba(99, 102, 241, 0.04) 0%, transparent 70%)",
+            filter: "blur(60px)",
+          }}
+        />
         <motion.div 
-          animate={{ scale: [1, 1.1, 1], rotate: [0, 5, -5, 0] }} 
-          transition={{ repeat: Infinity, duration: 2 }}
-          className="p-6 bg-primary/10 rounded-full"
+          animate={{ scale: [1, 1.05, 1] }} 
+          transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+          className="p-6 bg-indigo-500/10 rounded-full border border-indigo-500/20 shadow-[0_0_50px_rgba(99,102,241,0.2)]"
         >
-          <BrainCircuit className="h-16 w-16 text-primary" />
+          <BrainCircuit className="h-16 w-16 text-indigo-400" />
         </motion.div>
-        <h2 className="text-2xl font-bold tracking-tight">
+        <h2 className="text-2xl font-bold tracking-tight text-white/90">
           {isGenerating ? `Generating Roadmap for "${topic}"...` : "Loading your Roadmap..."}
         </h2>
-        <p className="text-muted-foreground max-w-md text-center">
+        <p className="text-white/40 max-w-md text-center text-sm px-4">
           {isGenerating ? "Our AI is currently analyzing the topic, designing the curriculum, and building your personalized learning path." : "Fetching your saved progress and nodes..."}
         </p>
         {isGenerating && (
-          <div className="w-64 h-2 bg-secondary rounded-full overflow-hidden mt-4">
+          <div className="w-64 h-2 bg-white/[0.06] rounded-full overflow-hidden mt-4">
             <motion.div 
-              className="h-full bg-primary"
+              className="h-full bg-gradient-to-r from-indigo-500 to-cyan-400"
               initial={{ width: "0%" }}
               animate={{ width: "100%" }}
-              transition={{ duration: 3, repeat: Infinity, ease: "linear" }}
+              transition={{ duration: 4, repeat: Infinity, ease: "linear" }}
             />
           </div>
         )}
@@ -547,31 +556,31 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
   }
 
   return (
-    <div className="flex h-[calc(100vh-4rem)] md:h-screen w-full relative overflow-hidden bg-background">
+    <div className="flex h-screen w-full relative overflow-hidden bg-black">
       {/* Left side: Canvas and Header */}
       <div className="flex-1 h-full flex flex-col relative min-w-0">
         {/* Header Panel with dynamic offset based on Sidebar collapse */}
-        <div className={`absolute top-4 right-4 md:right-8 z-10 flex justify-between items-center bg-background/80 backdrop-blur-md p-4 rounded-2xl border shadow-sm transition-all duration-300 ${
+        <div className={`absolute top-4 right-4 md:right-8 z-10 flex justify-between items-center bg-black/40 backdrop-blur-md p-4 rounded-2xl border border-white/[0.08] shadow-[0_4px_30px_rgba(0,0,0,0.2)] transition-all duration-300 ${
           isOpen ? "left-4 md:left-8" : "left-16 md:left-16"
         }`}>
           <div>
             <h1 className="text-2xl font-bold flex flex-wrap items-center gap-3">
-              <span>{topic}</span>
+              <span className="text-white/90">{topic}</span>
               {nodes.length > 0 && (
-                <span className="text-sm font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-500 border border-emerald-500/20">
+                <span className="text-sm font-medium px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                   {nodes.filter(n => n.data?.completed).length}/{nodes.length} Completed ({Math.round((nodes.filter(n => n.data?.completed).length / nodes.length) * 100)}%)
                 </span>
               )}
             </h1>
-            <p className="text-sm text-muted-foreground">AI-Generated Learning Path</p>
+            <p className="text-sm text-white/40">AI-Generated Learning Path</p>
           </div>
           <div className="flex gap-2">
             <Button 
               size="sm" 
-              className={`gap-2 transition-all ${
+              className={`gap-2 rounded-xl transition-all ${
                 isSaved
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  : ""
+                  : "bg-indigo-600 text-white hover:bg-indigo-500 hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
               }`}
               onClick={handleSaveToggle}
             >
@@ -582,7 +591,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
         </div>
 
         {/* React Flow Canvas */}
-        <div className="flex-1 w-full h-full bg-muted/20">
+        <div className="flex-1 w-full h-full bg-zinc-950">
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -594,10 +603,10 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
             fitView
             attributionPosition="bottom-left"
           >
-            <Background color={theme === "dark" ? "#333" : "#ccc"} gap={16} />
+            <Background color={theme === "dark" ? "#222" : "#ccc"} gap={16} />
             <Controls className="mb-4 mr-4" />
             <MiniMap 
-              nodeColor={theme === "dark" ? "#555" : "#eee"} 
+              nodeColor={theme === "dark" ? "#333" : "#eee"} 
               maskColor={theme === "dark" ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.8)"}
             />
           </ReactFlow>
@@ -608,7 +617,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
       {selectedNode && (
         <div 
           style={{ width: `${panelWidth}px` }}
-          className="h-full bg-background border-l border-border/80 flex flex-col animate-in slide-in-from-right duration-300 overflow-hidden shrink-0 relative max-w-full"
+          className="h-full bg-black/60 backdrop-blur-md border-l border-white/[0.08] flex flex-col animate-in slide-in-from-right duration-300 overflow-hidden shrink-0 relative max-w-full shadow-2xl"
         >
           {/* Resize Handle */}
           <div
@@ -620,23 +629,23 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
               setIsResizing(true);
             }}
             className={`absolute top-0 left-0 w-1.5 hover:w-2 h-full cursor-col-resize z-50 transition-all ${
-              isResizing ? "bg-primary w-2" : "bg-transparent hover:bg-primary/40 active:bg-primary"
+              isResizing ? "bg-indigo-500 w-2" : "bg-transparent hover:bg-indigo-500/40 active:bg-indigo-500"
             }`}
           />
 
           {/* Sidebar Header */}
-          <div className="p-4 border-b flex justify-between items-center bg-card/20 pl-6">
+          <div className="p-4 border-b border-white/[0.08] flex justify-between items-center bg-white/[0.01] pl-6">
             <div>
-              <h2 className="text-lg font-bold tracking-tight">{selectedNode.data.label}</h2>
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5 mt-0.5">
-                <Sparkles className="h-3 w-3 text-primary animate-pulse" /> AI Learning Assistant
+              <h2 className="text-lg font-bold tracking-tight text-white/90">{selectedNode.data.label}</h2>
+              <p className="text-xs text-white/40 flex items-center gap-1.5 mt-0.5">
+                <Sparkles className="h-3 w-3 text-indigo-400 animate-pulse" /> AI Learning Assistant
               </p>
             </div>
-            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full" onClick={handleClosePanel}>✕</Button>
+            <Button variant="ghost" size="icon" className="h-8 w-8 rounded-full text-white/50 hover:text-white hover:bg-white/10" onClick={handleClosePanel}>✕</Button>
           </div>
 
           {/* Dynamic Tabs Bar */}
-          <div className="flex border-b border-border bg-muted/20 pl-6 pr-2 overflow-x-auto scrollbar-none">
+          <div className="flex border-b border-white/[0.08] bg-white/[0.01] pl-6 pr-2 overflow-x-auto scrollbar-none">
             {[
               { id: "overview", label: "Overview" },
               { id: "concepts", label: "Key Concepts" },
@@ -649,14 +658,16 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className="relative py-2.5 px-3 text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none shrink-0"
-                  style={{ color: isActive ? "hsl(var(--primary))" : "hsl(var(--muted-foreground))" }}
+                  className={cn(
+                    "relative py-2.5 px-3 text-xs font-semibold whitespace-nowrap transition-colors focus-visible:outline-none shrink-0",
+                    isActive ? "text-indigo-400" : "text-white/40 hover:text-white/60"
+                  )}
                 >
                   {tab.label}
                   {isActive && (
                     <motion.div
                       layoutId="activeTabUnderline"
-                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-primary"
+                      className="absolute bottom-0 left-0 right-0 h-0.5 bg-indigo-500"
                       transition={{ type: "spring", stiffness: 380, damping: 30 }}
                     />
                   )}
@@ -694,26 +705,26 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                 {activeTab === "overview" && (
                   <div className="space-y-4 animate-in fade-in duration-200">
                     <div className="space-y-2">
-                      <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground"><FileText className="h-4 w-4" /> Summary</h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed bg-muted/20 border p-3 rounded-xl">
+                      <h3 className="font-semibold text-sm flex items-center gap-1.5 text-white/90"><FileText className="h-4 w-4 text-indigo-400" /> Summary</h3>
+                      <p className="text-xs text-white/70 leading-relaxed bg-white/[0.01] border border-white/[0.06] p-3 rounded-xl">
                         {notes.overview?.summary || "No summary available."}
                       </p>
                     </div>
 
                     <div className="space-y-2">
-                      <h3 className="font-semibold text-sm flex items-center gap-1.5 text-foreground"><Sparkles className="h-4 w-4 text-primary" /> Why this topic matters</h3>
-                      <p className="text-xs text-muted-foreground leading-relaxed">
+                      <h3 className="font-semibold text-sm flex items-center gap-1.5 text-white/90"><Sparkles className="h-4 w-4 text-indigo-400" /> Why this topic matters</h3>
+                      <p className="text-xs text-white/50 leading-relaxed">
                         {notes.overview?.importance || "No importance description available."}
                       </p>
                     </div>
 
                     {notes.overview?.applications && notes.overview.applications.length > 0 && (
                       <div className="space-y-2">
-                        <h3 className="font-semibold text-sm text-foreground">Real-world applications</h3>
+                        <h3 className="font-semibold text-sm text-white/90">Real-world applications</h3>
                         <ul className="space-y-2">
-                           {notes.overview.applications.map((appStr: string, idx: number) => (
-                            <li key={idx} className="text-xs text-muted-foreground flex items-start gap-2">
-                              <span className="h-1.5 w-1.5 rounded-full bg-primary shrink-0 mt-1.5" />
+                          {notes.overview.applications.map((appStr: string, idx: number) => (
+                            <li key={idx} className="text-xs text-white/50 flex items-start gap-2">
+                              <span className="h-1.5 w-1.5 rounded-full bg-indigo-500 shrink-0 mt-1.5" />
                               <span>{appStr}</span>
                             </li>
                           ))}
@@ -722,8 +733,8 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                     )}
 
                     {/* Resources section inside Overview tab */}
-                    <div className="pt-4 border-t border-border/45">
-                      <h3 className="font-semibold text-sm mb-3 flex items-center gap-1.5 text-foreground"><PlayCircle className="h-4 w-4" /> Topic Resources</h3>
+                    <div className="pt-4 border-t border-white/[0.08]">
+                      <h3 className="font-semibold text-sm mb-3 flex items-center gap-1.5 text-white/90"><PlayCircle className="h-4 w-4 text-indigo-400" /> Topic Resources</h3>
                       <div className="space-y-3">
                         {selectedNode.data.resources && selectedNode.data.resources.length > 0 ? (
                           selectedNode.data.resources.map((resource: any, idx: number) => (
@@ -734,12 +745,12 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                               rel="noopener noreferrer"
                               className="block hover:no-underline"
                             >
-                              <Card className="hover:border-primary/50 transition-colors cursor-pointer group bg-muted/40">
+                              <Card className="hover:border-indigo-500/50 transition-colors cursor-pointer group bg-white/[0.01] border-white/[0.06] hover:bg-white/[0.02]">
                                 <CardHeader className="p-3">
-                                  <CardTitle className="text-xs font-semibold group-hover:text-primary transition-colors">
+                                  <CardTitle className="text-xs font-semibold group-hover:text-indigo-400 transition-colors text-white/80">
                                     {resource.title}
                                   </CardTitle>
-                                  <p className="text-[10px] text-muted-foreground mt-0.5 capitalize">
+                                  <p className="text-[10px] text-white/40 mt-0.5 capitalize">
                                     {resource.type || "Article"}
                                   </p>
                                 </CardHeader>
@@ -747,7 +758,7 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                             </a>
                           ))
                         ) : (
-                          <p className="text-xs text-muted-foreground italic">No learning resources generated for this topic yet.</p>
+                          <p className="text-xs text-white/40 italic">No learning resources generated for this topic yet.</p>
                         )}
                       </div>
                     </div>
@@ -821,13 +832,13 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                 {/* 4. Common Mistakes Tab */}
                 {activeTab === "mistakes" && (
                   <div className="space-y-4 animate-in fade-in duration-200">
-                    <h3 className="font-semibold text-sm mb-2 text-foreground">Frequent mistakes & best practices</h3>
+                    <h3 className="font-semibold text-sm mb-2 text-white/90">Frequent mistakes & best practices</h3>
                     {notes.commonMistakes && notes.commonMistakes.length > 0 ? (
                       notes.commonMistakes.map((item: any, idx: number) => (
                         <CommonMistakeCard key={idx} item={item} />
                       ))
                     ) : (
-                      <p className="text-xs text-muted-foreground italic">No common mistakes recorded.</p>
+                      <p className="text-xs text-white/40 italic">No common mistakes recorded.</p>
                     )}
                   </div>
                 )}
@@ -835,19 +846,19 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
                 {/* 5. Revision Notes Tab */}
                 {activeTab === "revision" && (
                   <div className="space-y-4 animate-in fade-in duration-200">
-                    <h3 className="font-semibold text-sm mb-2 text-foreground">Last-minute revision recap</h3>
+                    <h3 className="font-semibold text-sm mb-2 text-white/90">Last-minute revision recap</h3>
                     <div className="grid gap-3">
                       {notes.revisionNotes && notes.revisionNotes.length > 0 ? (
                         notes.revisionNotes.map((notePoint: string, idx: number) => (
-                          <div key={idx} className="border border-amber-500/15 bg-amber-500/5 rounded-xl p-3.5 shadow-sm relative overflow-hidden">
-                            <div className="absolute top-0 left-0 w-1 h-full bg-amber-500/60" />
-                            <p className="text-xs text-amber-700 dark:text-amber-300 font-semibold leading-relaxed">
+                          <div key={idx} className="border border-indigo-500/15 bg-indigo-500/5 rounded-xl p-3.5 shadow-sm relative overflow-hidden">
+                            <div className="absolute top-0 left-0 w-1 h-full bg-indigo-500/60" />
+                            <p className="text-xs text-indigo-200 font-semibold leading-relaxed">
                               {notePoint}
                             </p>
                           </div>
                         ))
                       ) : (
-                        <p className="text-xs text-muted-foreground italic">No revision notes available.</p>
+                        <p className="text-xs text-white/40 italic">No revision notes available.</p>
                       )}
                     </div>
                   </div>
@@ -861,12 +872,12 @@ function RoadmapPageContent({ params }: { params: Promise<{ id: string }> }) {
           </div>
           
           {/* Side Panel Footer */}
-          <div className="p-4 pl-6 border-t bg-muted/20">
+          <div className="p-4 pl-6 border-t border-white/[0.08] bg-white/[0.01]">
             <Button
-              className={`w-full gap-2 transition-all ${
+              className={`w-full gap-2 rounded-xl transition-all ${
                 selectedNode.data.completed
                   ? "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  : ""
+                  : "bg-indigo-600 hover:bg-indigo-500 text-white hover:shadow-[0_0_20px_rgba(99,102,241,0.3)]"
               }`}
               onClick={() => toggleProgress(selectedNode)}
             >
