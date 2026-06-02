@@ -43,6 +43,7 @@ export default function RoadmapPage({ params }: { params: Promise<{ id: string }
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(id === "new");
   const [progress, setProgress] = useState<any[]>([]);
+  const [isSaved, setIsSaved] = useState(false);
   
   const hasFetched = useRef(false);
 
@@ -123,12 +124,14 @@ export default function RoadmapPage({ params }: { params: Promise<{ id: string }
           
           const data = await res.json();
           processNodesAndEdges(data);
+          setIsSaved(data.isSaved || false);
           router.replace(`/roadmap/${data.id}?topic=${encodeURIComponent(topic)}`);
         } else {
           const res = await fetch(`/api/roadmap/${id}`);
           if (res.ok) {
             const data = await res.json();
             processNodesAndEdges(data);
+            setIsSaved(data.isSaved || false);
           }
         }
       } catch (error: any) {
@@ -239,6 +242,30 @@ export default function RoadmapPage({ params }: { params: Promise<{ id: string }
     }
   };
 
+  const handleSaveToggle = async () => {
+    const originalSavedState = isSaved;
+    const newSavedState = !originalSavedState;
+    
+    // Optimistic UI update
+    setIsSaved(newSavedState);
+    
+    try {
+      const res = await fetch(`/api/roadmap/${id}/save`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ saved: newSavedState }),
+      });
+      
+      if (!res.ok) {
+        throw new Error("Failed to toggle save status");
+      }
+    } catch (err) {
+      console.error(err);
+      setIsSaved(originalSavedState);
+      alert("Failed to save roadmap. Please verify you are logged in.");
+    }
+  };
+
 
   if (isLoading || isGenerating) {
     return (
@@ -289,8 +316,17 @@ export default function RoadmapPage({ params }: { params: Promise<{ id: string }
           <Button variant="outline" size="sm" className="hidden sm:flex gap-2">
             <Share2 className="h-4 w-4" /> Share
           </Button>
-          <Button size="sm" className="gap-2">
-            <BookmarkPlus className="h-4 w-4" /> Save Path
+          <Button 
+            size="sm" 
+            className={`gap-2 transition-all ${
+              isSaved
+                ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                : ""
+            }`}
+            onClick={handleSaveToggle}
+          >
+            <BookmarkPlus className={`h-4 w-4 ${isSaved ? "fill-white" : ""}`} /> 
+            {isSaved ? "Saved" : "Save Path"}
           </Button>
         </div>
       </div>

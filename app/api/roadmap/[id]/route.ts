@@ -98,9 +98,21 @@ export async function GET(
         })
       : [];
 
+    const isSaved = dbUser
+      ? await prisma.savedRoadmap.findUnique({
+          where: {
+            userId_roadmapId: {
+              userId: dbUser.id,
+              roadmapId: id,
+            },
+          },
+        }) !== null
+      : false;
+
     return NextResponse.json({
       ...roadmap,
       progress,
+      isSaved,
     });
   } catch (error) {
     console.error("[ROADMAP_GET_ERROR]", error);

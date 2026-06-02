@@ -4,8 +4,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { BrainCircuit, ArrowRight, Zap, BookOpen, Search } from "lucide-react";
+import { UserButton, useAuth } from "@clerk/nextjs";
 
 export default function LandingPage() {
+  const { isSignedIn } = useAuth();
+
   return (
     <div className="min-h-screen bg-black text-white selection:bg-primary selection:text-primary-foreground">
       {/* Navbar */}
@@ -16,12 +19,23 @@ export default function LandingPage() {
             <span className="text-lg font-bold tracking-tight">SkillMapAi</span>
           </div>
           <div className="flex items-center gap-4">
-            <Link href="/sign-in">
-              <Button variant="ghost" className="text-white hover:text-white/80 hover:bg-white/10">Log in</Button>
-            </Link>
-            <Link href="/sign-up">
-              <Button className="bg-white text-black hover:bg-white/90">Get Started</Button>
-            </Link>
+            {isSignedIn ? (
+              <>
+                <Link href="/dashboard">
+                  <Button variant="ghost" className="text-white hover:text-white/80 hover:bg-white/10">Dashboard</Button>
+                </Link>
+                <UserButton />
+              </>
+            ) : (
+              <>
+                <Link href="/sign-in">
+                  <Button variant="ghost" className="text-white hover:text-white/80 hover:bg-white/10">Log in</Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button className="bg-white text-black hover:bg-white/90">Get Started</Button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </header>
@@ -73,7 +87,7 @@ export default function LandingPage() {
                   readOnly
                 />
               </div>
-              <Link href="/sign-up">
+              <Link href={isSignedIn ? "/search" : "/sign-up"}>
                 <Button size="lg" className="h-12 px-8 rounded-xl bg-white text-black hover:bg-white/90 gap-2 w-full sm:w-auto">
                   Generate Roadmap <ArrowRight className="h-4 w-4" />
                 </Button>

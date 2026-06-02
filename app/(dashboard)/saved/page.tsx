@@ -1,7 +1,8 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Bookmark, ArrowRight, Trash2 } from "lucide-react";
+import { Bookmark, ArrowRight } from "lucide-react";
 import Link from "next/link";
+import { UnsaveButton } from "@/components/roadmap/UnsaveButton";
 import { prisma } from "@/lib/prisma";
 import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
@@ -17,12 +18,17 @@ export default async function SavedPage() {
     where: { userId }
   });
 
-  const savedRoadmaps = dbUser
-    ? await prisma.roadmap.findMany({
-        where: { authorId: dbUser.id },
+  const savedRoadmapRelations = dbUser
+    ? await prisma.savedRoadmap.findMany({
+        where: { userId: dbUser.id },
+        include: {
+          roadmap: true
+        },
         orderBy: { createdAt: 'desc' }
       })
     : [];
+
+  const savedRoadmaps = savedRoadmapRelations.map(sr => sr.roadmap);
 
   return (
     <div className="p-8 max-w-6xl mx-auto space-y-8">
@@ -37,9 +43,7 @@ export default async function SavedPage() {
             <CardHeader>
               <div className="flex justify-between items-start">
                 <CardTitle className="line-clamp-1">{roadmap.title}</CardTitle>
-                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity hover:text-destructive">
-                  <Trash2 className="h-4 w-4" />
-                </Button>
+                <UnsaveButton roadmapId={roadmap.id} />
               </div>
               <CardDescription>Generated for "{roadmap.topic}"</CardDescription>
             </CardHeader>
