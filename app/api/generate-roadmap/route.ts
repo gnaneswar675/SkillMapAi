@@ -1,0 +1,243 @@
+import { NextResponse } from "next/server";
+import Groq from "groq-sdk";
+import { prisma } from "@/lib/prisma";
+import { auth, currentUser } from "@clerk/nextjs/server";
+
+// Initialize Groq API
+const groq = new Groq({ apiKey: process.env.GROQ_API_KEY || "" });
+
+export async function POST(req: Request) {
+  try {
+    const { userId } = await auth();
+    const clerkUser = await currentUser();
+
+    if (!userId || !clerkUser) {
+      return new NextResponse("Unauthorized", { status: 401 });
+    }
+
+    // Ensure the user exists in our DB to prevent foreign key errors
+    const dbUser = await prisma.user.upsert({
+      where: { userId },
+      update: {},
+      create: {
+        userId: userId,
+        email: clerkUser.emailAddresses[0]?.emailAddress || "",
+        name: `${clerkUser.firstName || ''} ${clerkUser.lastName || ''}`.trim() || "Anonymous",
+        imageUrl: clerkUser.imageUrl,
+      },
+    });
+
+    const { topic } = await req.json();
+    if (!topic) {
+      return new NextResponse("Topic is required", { status: 400 });
+    }
+
+    // Check if roadmap already exists to save API costs
+    const existingRoadmap = await prisma.roadmap.findUnique({
+      where: { topic: topic.toLowerCase() },
+      include: {
+        topics: {
+          include: {
+            resources: true,
+          },
+        },
+      },
+    });
+
+    if (existingRoadmap) {
+      if (existingRoadmap.topics.length === 0 && Array.isArray(existingRoadmap.nodes)) {
+        try {
+          const nodes = existingRoadmap.nodes as any[];
+          const roadmapId = existingRoadmap.id;
+          await prisma.$transaction(
+            nodes.map((node: any) => {
+              const rawResources = node.data?.resources || [];
+              const resources = rawResources.length > 0 ? rawResources : [
+                {
+                  title: `GeeksforGeeks: Learn ${node.data?.label || "Topic"}`,
+                  url: `https://www.geeksforgeeks.org/search/${encodeURIComponent(node.data?.label || "Topic")}/`,
+                  type: "article"
+                },
+                {
+                  title: `Google Search: ${node.data?.label || "Topic"}`,
+                  url: `https://www.google.com/search?q=${encodeURIComponent((node.data?.label || "Topic") + " geeksforgeeks")}`,
+                  type: "search"
+                }
+              ];
+              return prisma.topic.create({
+                data: {
+                  roadmapId: roadmapId,
+                  title: node.data?.label || "Topic",
+                  description: node.data?.description || `Overview of ${node.data?.label || "Topic"}`,
+                  level: node.data?.level || "Beginner",
+                  nodeId: node.id,
+                  resources: {
+                    create: resources.map((res: any) => ({
+                      title: res.title,
+                      url: res.url,
+                      type: res.type || "article",
+                    })),
+                  },
+                },
+              });
+            })
+          );
+          const updatedRoadmap = await prisma.roadmap.findUnique({
+            where: { id: existingRoadmap.id },
+            include: {
+              topics: {
+                include: {
+                  resources: true,
+                },
+              },
+            },
+          });
+          return NextResponse.json(updatedRoadmap);
+        } catch (migrationError) {
+          console.error("Failed to migrate existing roadmap topics:", migrationError);
+        }
+      }
+      return NextResponse.json(existingRoadmap);
+    }
+
+    if (!process.env.GROQ_API_KEY || process.env.GROQ_API_KEY === "your_groq_api_key_here") {
+      return new NextResponse("Llama/Groq API key is missing. Please add GROQ_API_KEY to your .env file.", { status: 400 });
+    }
+
+    const prompt = `
+You are an expert curriculum designer. 
+Generate a detailed learning roadmap for the given topic: "${topic}". 
+Return ONLY a valid JSON object with this exact structure:
+{
+  "nodes": [
+    { 
+      "id": "1", 
+      "position": { "x": 400, "y": 0 }, 
+      "type": "input", 
+      "data": { 
+        "label": "Topic Name",
+        "description": "A clear, detailed description explaining this topic or concept.",
+        "resources": [
+          { "title": "GeeksforGeeks: Topic Name Guide", "url": "https://www.geeksforgeeks.org/real-url-slug/", "type": "article" },
+          { "title": "Official Documentation", "url": "https://official-docs-site.com/real-path", "type": "documentation" }
+        ]
+      } 
+    }
+  ],
+  "edges": [
+    { "id": "e1-2", "source": "1", "target": "2", "animated": true }
+  ],
+  "description": "A short 1-2 sentence summary of this learning path."
+}
+
+CRITICAL STRUCTURE INSTRUCTIONS:
+1. The roadmap MUST be generated as a **branching tree/graph structure**, NOT a single linear vertical line.
+2. Introduce branching tracks (e.g. Node 1 splits into Node 2 on x: 200 and Node 3 on x: 600, representing parallel or optional skills to learn), which can then merge back into a single required node (e.g. Node 2 and Node 3 both connect to Node 4 on x: 400).
+3. Use 6-10 nodes in total.
+4. Position nodes cleanly on a vertical tree layout:
+   - Root nodes at the top (y: 0, centered on x: 400)
+   - Left-branched nodes (e.g. x: 150 to 250) and Right-branched nodes (e.g. x: 550 to 650) at subsequent vertical intervals (y: 150, 300, 450...)
+   - End node at the bottom (y: max_y, centered on x: 400, type "output")
+5. Provide a minimum spacing of 200px horizontally and 150px vertically between adjacent nodes to prevent overlaps.
+
+CRITICAL INSTRUCTIONS FOR RESOURCES:
+1. You MUST generate 2-3 REAL, SPECIFIC, AND FUNCTIONAL resource links for each node.
+2. DO NOT use generic placeholders like "example.com", "your-url-slug", "topic-name-url-slug", "real-url-slug", or "official-docs-site.com". All URLs must be actual, valid URLs pointing to educational content on the internet.
+3. Prioritize high-quality links from GeeksforGeeks (gfg). For example:
+   - For React Virtual DOM: "https://www.geeksforgeeks.org/reactjs-virtual-dom/"
+   - For React Hooks: "https://www.geeksforgeeks.org/reactjs-hooks/"
+   - For SQL Joins: "https://www.geeksforgeeks.org/sql-join-set-1-inner-left-right-and-full-joins/"
+   - For JS Promises: "https://www.geeksforgeeks.org/javascript-promises/"
+4. If a GeeksforGeeks link is not available, provide real links from official documentation (e.g., react.dev, developer.mozilla.org, nextjs.org/docs), freeCodeCamp, or youtube.com (search queries or specific channels).
+5. All generated URLs must be complete, beginning with http:// or https://.
+`;
+
+    // Call Groq API
+    const chatCompletion = await groq.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: "You are a JSON generator. You always return perfect, parseable JSON and nothing else."
+        },
+        {
+          role: "user",
+          content: prompt
+        }
+      ],
+      model: process.env.GROQ_MODEL || "openai/gpt-oss-20b",
+      response_format: { type: "json_object" },
+    });
+
+    let aiContent = chatCompletion.choices[0]?.message?.content || "";
+    aiContent = aiContent.trim();
+
+    if (!aiContent) {
+      throw new Error("Failed to generate content from Groq");
+    }
+
+    const parsedContent = JSON.parse(aiContent);
+
+    // Save to Database
+    const newRoadmap = await prisma.roadmap.create({
+      data: {
+        title: `${topic} Roadmap`,
+        topic: topic.toLowerCase(),
+        description: parsedContent.description || "Generated by SkillMapAi",
+        nodes: parsedContent.nodes,
+        edges: parsedContent.edges,
+        authorId: dbUser.id,
+        topics: {
+          create: (parsedContent.nodes || []).map((node: any) => {
+            const rawResources = node.data?.resources || [];
+            const resources = rawResources.length > 0 ? rawResources : [
+              {
+                title: `GeeksforGeeks: Learn ${node.data?.label || "Topic"}`,
+                url: `https://www.geeksforgeeks.org/search/${encodeURIComponent(node.data?.label || "Topic")}/`,
+                type: "article"
+              },
+              {
+                title: `Google Search: ${node.data?.label || "Topic"}`,
+                url: `https://www.google.com/search?q=${encodeURIComponent((node.data?.label || "Topic") + " geeksforgeeks")}`,
+                type: "search"
+              }
+            ];
+            return {
+              title: node.data?.label || "Topic",
+              description: node.data?.description || `Overview of ${node.data?.label || "Topic"}`,
+              level: node.data?.level || "Beginner",
+              nodeId: node.id,
+              resources: {
+                create: resources.map((res: any) => ({
+                  title: res.title,
+                  url: res.url,
+                  type: res.type || "article",
+                })),
+              },
+            };
+          }),
+        },
+      },
+      include: {
+        topics: {
+          include: {
+            resources: true,
+          },
+        },
+      },
+    });
+
+    return NextResponse.json(newRoadmap);
+  } catch (error: any) {
+    console.error("[ROADMAP_GENERATE_ERROR]", error);
+
+    if (error?.status === 401) {
+      return new NextResponse("Invalid Llama API key. Please check your credentials.", { status: 401 });
+    }
+
+    if (error?.message) {
+      return new NextResponse(error.message, { status: 500 });
+    }
+
+    return new NextResponse("Internal Error", { status: 500 });
+  }
+}
